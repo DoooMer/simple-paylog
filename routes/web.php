@@ -13,30 +13,35 @@
 
 /** @var \Laravel\Lumen\Routing\Router $router */
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
-});
 
-$router->group(['prefix' => 'api'], function () use ($router) {
+$router->group(['prefix' => ''], function () use ($router) {
 
-    $router->group(['prefix' => 'v1', 'middleware' => 'cors'], function () use ($router) {
+    $router->get('/', function () use ($router) {
+        return $router->app->version();
+    });
 
-        $router->post('login', 'AuthController@login')
-            ->post('logout', 'AuthController@logout');
+    $router->group(['prefix' => 'api'], function () use ($router) {
 
-        $router->group(['prefix' => 'operations', 'middleware' => 'auth'], function () use ($router) {
+        $router->group(['prefix' => 'v1', 'middleware' => 'cors'], function () use ($router) {
 
-            $router->get('/', 'OperationController@all')
-                ->post('/', 'OperationController@create')
-                ->put('/{id}', 'OperationController@update')
-                ->delete('/{id}', 'OperationController@delete');
+            $router->post('login', 'AuthController@login')
+                ->post('logout', 'AuthController@logout');
+
+            $router->group(['prefix' => 'operations', 'middleware' => 'auth'], function () use ($router) {
+
+                $router->get('/', 'OperationController@all')
+                    ->post('/', 'OperationController@create')
+                    ->put('/{id}', 'OperationController@update')
+                    ->delete('/{id}', 'OperationController@delete');
+
+            });
+
+            $router->get('balance', [
+                'middleware' => 'auth',
+                'uses' => 'BalanceController@balance',
+            ]);
 
         });
-
-        $router->get('balance', [
-            'middleware' => 'auth',
-            'uses' => 'BalanceController@balance',
-        ]);
 
     });
 
