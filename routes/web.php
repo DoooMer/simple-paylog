@@ -22,9 +22,9 @@ $router->group(['prefix' => ''], function () use ($router) {
 
     $router->group(['prefix' => 'api'], function () use ($router) {
 
-        $router->group(['prefix' => 'v1', 'middleware' => 'cors'], function () use ($router) {
+        $router->group(['prefix' => 'v1'], function () use ($router) {
 
-            $router->post('login', 'AuthController@login')
+            $router->post('login', ['middleware' => 'cors', 'uses' => 'AuthController@login'])
                 ->post('logout', 'AuthController@logout');
 
             $router->group(['prefix' => 'operations', 'middleware' => 'auth'], function () use ($router) {
