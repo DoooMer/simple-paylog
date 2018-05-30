@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Operation;
 use App\services\operation\CreationService;
+use App\UserRole;
 use Illuminate\Http\Request;
 
 /**
@@ -12,6 +13,8 @@ use Illuminate\Http\Request;
 class OperationController extends Controller
 {
 
+    use CheckAccess;
+
     /**
      * Список всех операций.
      *
@@ -19,14 +22,18 @@ class OperationController extends Controller
      */
     public function all()
     {
+        $links = [];
+
+        if ($this->can(UserRole::ADMIN)) {
+            $links['create'] = url('/api/v1/operations');
+        }
+
         return response()->json([
             'operations' => Operation::query()
                 ->orderBy('action_at', 'asc')
                 ->orderBy('created_at', 'asc')
                 ->get(),
-            '_links' => [
-                'create' => url('/api/v1/operations'),
-            ],
+            '_links' => $links,
         ]);
     }
 
@@ -39,6 +46,8 @@ class OperationController extends Controller
      */
     public function create(Request $request)
     {
+        $this->check(UserRole::ADMIN);
+
         $service = new CreationService($request);
         $operation = $service->create();
 
@@ -63,6 +72,8 @@ class OperationController extends Controller
      */
     public function update($id)
     {
+        $this->check(UserRole::ADMIN);
+
         return 'Update the operation will be here';
     }
 
@@ -74,6 +85,8 @@ class OperationController extends Controller
      */
     public function delete($id)
     {
+        $this->check(UserRole::ADMIN);
+
         return 'Soft delete the operation will be here';
     }
 
