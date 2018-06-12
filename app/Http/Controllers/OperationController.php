@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Operation;
+use App\OperationPaginator;
+use App\repository\OperationRepository;
 use App\services\operation\CreationService;
 use App\UserRole;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Контроллер операций.
@@ -18,21 +20,31 @@ class OperationController extends Controller
     /**
      * Список всех операций.
      *
+     * @param Request $request
+     * @param OperationRepository $operationRepository
      * @return string
      */
-    public function all()
+    public function all(Request $request, OperationRepository $operationRepository)
     {
+        $pageSize = $request->get('pageSize', 8);
+
+        if ($pageSize <= 0) {
+            throw new BadRequestHttpException('Parameter "pageSize" can not be less or equal of 0');
+        }
+
+        $operations = $operationRepository->getAllByPage($pageSize);
         $links = [];
+
+        if (($nextPage = $operations->nextPageUrl()) !== null) {
+            $links['next'] = $nextPage;
+        }
 
         if ($this->can(UserRole::ADMIN)) {
             $links['create'] = url('/api/v1/operations');
         }
 
         return response()->json([
-            'operations' => Operation::query()
-                ->orderBy('action_at', 'asc')
-                ->orderBy('created_at', 'asc')
-                ->get(),
+            'operations' => $operations->items(),
             '_links' => $links,
         ]);
     }
