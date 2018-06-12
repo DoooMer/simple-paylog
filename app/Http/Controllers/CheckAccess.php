@@ -44,7 +44,7 @@ trait CheckAccess
     public function check(string $roleName): void
     {
         if (!$this->can($roleName)) {
-            throw new AccessDeniedHttpException();
+            throw new AccessDeniedHttpException('Access denied');
         }
     }
 }

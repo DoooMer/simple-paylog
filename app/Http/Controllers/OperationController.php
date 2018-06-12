@@ -41,15 +41,20 @@ class OperationController extends Controller
      * Добавление операции.
      *
      * @param Request $request
+     * @param CreationService $service
      * @return string
+     * @throws \ErrorException
      * @throws \Throwable
      */
-    public function create(Request $request)
+    public function create(Request $request, CreationService $service)
     {
         $this->check(UserRole::ADMIN);
 
-        $service = new CreationService($request);
-        $operation = $service->create();
+        $operation = $service->create($request);
+
+        if ($operation === null) {
+            throw new \ErrorException('Unable to add a new operation');
+        }
 
         return response()->json(
             [

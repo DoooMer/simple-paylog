@@ -5,34 +5,27 @@ namespace App\services\operation;
 use App\Operation;
 use Illuminate\Http\Request;
 
+/**
+ * Сервис добавления операций.
+ */
 class CreationService
 {
     /**
-     * @var Operation
-     */
-    private $model;
-
-    /**
      * @param Request $request
-     */
-    public function __construct(Request $request)
-    {
-        $this->model = new Operation();//::create($request->all());
-        $this->model->fill($request->only(['amount', 'action_at', 'description']));
-        $this->model->user_id = $request->user()->id;
-        $this->model->status = Operation::STATUS_NEW;
-    }
-
-    /**
-     * @return bool
+     * @return Operation|null
      * @throws \Throwable
      */
-    public function create(): Operation
+    public function create(Request $request): ?Operation
     {
-        if ($this->model->saveOrFail()) {
-            return $this->model;
+        $model = new Operation();
+        $model->fill($request->only(['amount', 'action_at', 'description']));
+        $model->user_id = $request->user()->id;
+        $model->status = Operation::STATUS_CONFIRMED;
+
+        if ($model->saveOrFail()) {
+            return $model;
         }
 
-        return false;
+        return null;
     }
 }
